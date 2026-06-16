@@ -52,12 +52,9 @@ include(${CMAKE_SOURCE_DIR}/patcher/CMakeLists.txt)
 
 # Build release package
 if(RELEASE)
-    # Build installer only for release
-    add_subdirectory(utils/installer)
 
     # Get binary directories for file paths
     get_target_property(launcher_binary_dir launcher BINARY_DIR)
-    get_target_property(installer_binary_dir osdmbr-installer BINARY_DIR)
 
     # Custom launcher, MBR and MBR installer paths
     add_custom_command(
