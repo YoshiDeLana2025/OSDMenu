@@ -25,7 +25,7 @@ set(PATCHER_CNF_FILE "" CACHE STRING "Path to embedded CNF file")
 set(PATCHER_KELF_TYPE "fmcb" CACHE STRING "KELF type (fmcb, etc.)")
 
 # Get git version
-set(GIT_VERSION "v1.2.0")
+set(GIT_VERSION "v1.2.0 Yoshi's Mod")
 
 set(PATCHER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/patcher")
 set(EE_SOURCES
