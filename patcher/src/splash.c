@@ -5,9 +5,9 @@
 
 // Initializes GS and displays FMCB splash screen
 void gsDisplaySplash(GSVideoMode mode) {
-  int splashY = 185;
+  int splashY = 165;
   if (mode == GS_MODE_PAL) {
-    splashY = 247;
+    splashY = 195;
   }
 
   gsInit(mode);
