@@ -1,13 +1,12 @@
 name: Build
 
 on:
-  push:
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: ghcr.io/ps2homebrew/ps2homebrew:main
+    container: ghcr.io/ps2homebrew/ps2homebrew@sha256:106ad024016ef0776cbfd99b27fb30c849de62fe374653680fd7a0f19245e078
     steps:
     - name: Install cmake
       run: |
@@ -31,16 +30,6 @@ jobs:
         cmake -B build -DRELEASE=ON
         cmake --build build
 
-    - name: Fetch OSDMenu Configurator
-      run: |
-        apk add --no-cache curl jq unzip
-        RELEASE_JSON=$(curl -sL "https://api.github.com/repos/pcm720/OSDMenu-Configurator/releases/latest")
-        ASSET_URL=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | test("^osdmenu-configurator-.*\\.zip$")) | .browser_download_url' | head -1)
-        curl -sL -o build/configurator.zip "$ASSET_URL"
-        mkdir -p build/release/configurator
-        unzip -q -o build/configurator.zip -d build/release/configurator
-        rm build/configurator.zip
-
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       if: steps.make.outcome == 'success'
@@ -48,46 +37,3 @@ jobs:
         name: artifacts
         path: |
           build/release/**
-
-  release:
-    needs: [build]
-    runs-on: ubuntu-latest
-    permissions: write-all
-    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main'
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Fetch full clone
-      run: |
-        git config --global --add safe.directory "$GITHUB_WORKSPACE"
-        git fetch --prune --unshallow
-
-    - name: Get git describe
-      run: |
-        echo "GIT_VERSION=$(git describe --always --dirty --tags --exclude nightly)" >> $GITHUB_ENV
-
-    - name: Download all artifacts
-      uses: actions/download-artifact@v4
-
-    - name: Prepare release archive
-      run: |
-        cd artifacts
-        zip -r ../osdmenu-${{ env.GIT_VERSION }}.zip ./*
-
-    - uses: "marvinpinto/action-automatic-releases@latest"
-      if: github.ref == 'refs/heads/main'
-      with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "nightly"
-        prerelease: true
-        title: "Nightly build"
-        files: |
-          osdmenu-${{ env.GIT_VERSION }}.zip
-
-    - uses: "marvinpinto/action-automatic-releases@latest"
-      if: startsWith(github.ref, 'refs/tags/v')
-      with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        draft: true
-        files: |
-          osdmenu-${{ env.GIT_VERSION }}.zip
