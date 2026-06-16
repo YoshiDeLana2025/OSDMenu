@@ -47,18 +47,19 @@ add_subdirectory(mbr)
 set(PATCHER_HOSD OFF)
 include(${CMAKE_SOURCE_DIR}/patcher/CMakeLists.txt)
 
+set(PATCHER_HOSD ON)
+include(${CMAKE_SOURCE_DIR}/patcher/CMakeLists.txt)
+
 # Build release package
 if(RELEASE)
     # Build installer only for release
     add_subdirectory(utils/installer)
 
     # Get binary directories for file paths
-    get_target_property(mbr_binary_dir osdmbr BINARY_DIR)
     get_target_property(launcher_binary_dir launcher BINARY_DIR)
     get_target_property(installer_binary_dir osdmbr-installer BINARY_DIR)
 
     # Custom launcher, MBR and MBR installer paths
-    
     add_custom_command(
         OUTPUT "${CMAKE_BINARY_DIR}/release/launcher/launcher.elf"
         COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/release/launcher"
@@ -71,6 +72,7 @@ if(RELEASE)
         # Create release directory structure
         COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/release"
         COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/release/patcher/kelfbinder"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/release/osdmbr/payloads"
         COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/release/launcher"
 
         # Copy examples
@@ -80,6 +82,9 @@ if(RELEASE)
         COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_BINARY_DIR}/osdmenu/osdmenu.elf" "${CMAKE_BINARY_DIR}/release/osdmenu.elf"
         COMMAND ${PYTHON3} "${CMAKE_SOURCE_DIR}/utils/scripts/makepsu.py" "${CMAKE_BINARY_DIR}/release/SYS_OSDMENU.psu" "SYS_OSDMENU" "${CMAKE_SOURCE_DIR}/utils/res/psu" "${CMAKE_BINARY_DIR}/release/osdmenu.elf"
 
+        # Copy hosdmenu.elf
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_BINARY_DIR}/hosdmenu/hosdmenu.elf" "${CMAKE_BINARY_DIR}/release/hosdmenu.elf"
+
         # Copy osdmenu KELF and related files
         COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/patcher/README.md" "${CMAKE_BINARY_DIR}/release/patcher/README.md"
         COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/utils/res/kelfbinder" "${CMAKE_BINARY_DIR}/release/patcher/kelfbinder"
@@ -88,11 +93,13 @@ if(RELEASE)
         # Copy README.md
         COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/README.md" "${CMAKE_BINARY_DIR}/release/README.md"
 
+
         # Copy launcher files
         COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/launcher/README.md" "${CMAKE_BINARY_DIR}/release/launcher/README.md"
 
         DEPENDS
             osdmenu
+            hosdmenu
             launcher
             "${CMAKE_BINARY_DIR}/release/launcher/launcher.elf"
         COMMENT "Creating release package"
