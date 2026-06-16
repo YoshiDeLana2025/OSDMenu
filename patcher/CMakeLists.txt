@@ -25,18 +25,7 @@ set(PATCHER_CNF_FILE "" CACHE STRING "Path to embedded CNF file")
 set(PATCHER_KELF_TYPE "fmcb" CACHE STRING "KELF type (fmcb, etc.)")
 
 # Get git version
-find_package(Git)
-if(GIT_FOUND)
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} describe --always --dirty --tags --exclude nightly
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE GIT_VERSION
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        ERROR_QUIET
-    )
-else()
-    set(GIT_VERSION "unknown")
-endif()
+set(GIT_VERSION "v1.2.0")
 
 set(PATCHER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/patcher")
 set(EE_SOURCES
